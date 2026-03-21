@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
-class EmailVerificationController extends Controller
+class EmailVerificationController
 {
     //
     public function index(Request $request)

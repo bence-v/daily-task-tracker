@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Category\GetCategories;
+use App\Actions\Category\ResolveCategory;
+use App\Actions\Task\CreateTask;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Models\Category;
 use App\Models\Task;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 
-class TaskController extends Controller
+class TaskController
 {
+    public function __construct(private readonly GetCategories $getCategories)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -28,8 +32,7 @@ class TaskController extends Controller
 
 
         $tasks = $query->paginate();
-
-        $categories = $request->user()->categories()->orderBy('name')->pluck('name', 'uuid')->toArray();
+        $categories = $this->getCategories->execute($request->user()->id);
 
         return view('tasks.index', [
             'tasks' => $tasks->toResourceCollection()->resolve(),
@@ -44,7 +47,7 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        $categories = $request->user()->categories()->orderBy('name')->pluck('name', 'uuid')->toArray();
+        $categories = $this->getCategories->execute($request->user()->id);
 
         return view('tasks.create', compact('categories'));
     }
@@ -52,21 +55,9 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTaskRequest $request)
+    public function store(StoreTaskRequest $request, ResolveCategory $resolveCategory, CreateTask $createTask)
     {
-        $taskData = $request->validated();
-
-        if($request->category_id) {
-            $category = Category::where('uuid', $request->category_id)->first();
-
-            if(! $category || $request->user()->cannot('manage',$category)) {
-                throw ValidationException::withMessages(['category_id' => 'the given category id does not exist']);
-            }
-
-            $taskData['category_id'] = $category->id;
-        }
-
-        $request->user()->tasks()->create($taskData);
+        $createTask->execute($request->validated(), $request->user());
 
         return to_route('tasks.index')->with('success', 'Task created successfully.');
     }
@@ -86,27 +77,10 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTaskRequest $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task, ResolveCategory $resolveCategory)
     {
         $validData = $request->validated();
-
-        if($request->category_id) {
-            $category = Category::where('uuid', $request->category_id)->first();
-
-            if(! $category || $request->user()->cannot('manage',$category)) {
-                throw ValidationException::withMessages(['category_id' => 'the given category id does not exist']);
-            }
-
-            $validData['category_id'] = $category->id;
-
-            if(! $validData['category_id'] ) {
-                throw ValidationException::withMessages(['category_id' => 'The given category id does not exist.']);
-            }
-
-            $task->category()->associate($category);
-
-            unset($validData['category_id']);
-        }
+        $validData['category_id'] =  $resolveCategory->execute($validData['category_id'], $request->user());
 
         $task->fill($validData);
         $task->save();
@@ -130,6 +104,6 @@ class TaskController extends Controller
             'completed_at' => $task->completed_at ? null : now(),
         ]);
 
-        return back();
+        return response()->json(['completed' => $task->completed_at !== null]);
     }
 }

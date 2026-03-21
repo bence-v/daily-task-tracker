@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 
-class PasswordResetController extends Controller
+class PasswordResetController
 {
     //
     public function showPasswordResetRequestForm()

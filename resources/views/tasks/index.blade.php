@@ -89,22 +89,19 @@
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 @foreach ($tasks as $task)
-                                    <tr>
+                                    <tr  data-task-item data-completed="{{ (bool) $task['completed_at']}}">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <form action="{{ route('tasks.toggle-complete', ['task' => $task['id']]) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="focus:outline-none cursor-pointer">
-                                                    @if($task['completed_at'])
-                                                        <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                    @else
-                                                        <svg class="h-6 w-6 text-gray-400 hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                    @endif
-                                                </button>
-                                            </form>
+                                            <button type="button" class="focus:outline-none cursor-pointer" data-task-toggle data-task-id="{{$task['id']}}">
+                                                @if($task['completed_at'])
+                                                    <svg class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                @else
+                                                    <svg class="h-6 w-6 text-gray-400 hover:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                @endif
+                                            </button>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 {{ $task['completed_at'] ? 'line-through text-gray-500' : '' }}">
                                             {{ $task['title'] }}
@@ -124,7 +121,7 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $task['task_date']->format('Y m d') ?? '-' }}
+                                            {{ $task['task_date']['display'] ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('tasks.edit', ['task' => $task['id']]) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-4">{{ __('Edit') }}</a>

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Observers\CategoryObserver;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -27,9 +29,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Category whereUserId($value)
  * @mixin \Eloquent
  */
+#[ObservedBy(CategoryObserver::class)]
 class Category extends Model
 {
-    use HasUuids;
+    use HasUuids, HasFactory;
+
+
 
     protected $fillable = [
         'name'

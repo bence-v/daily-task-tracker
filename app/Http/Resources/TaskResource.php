@@ -22,11 +22,11 @@ class TaskResource extends JsonResource
                 'id' => $this->category->uuid,
                 'name' => $this->category->name,
             ]),
-            'task_date' => $this->task_date,
-            'is_recurring' => $this->is_recurring,
-            'completed_at' => $this->completed_at?->format('M d, Y'),
-            'created_at' => $this->created_at?->format('M:d, Y g:i A'),
-            'updated_at' => $this->updated_at?->format('M:d, Y g:i A'),
+            'task_date' => new DateTimeResource($this->task_date,includeTime: false)->resource($request),
+            'is_recurring' => new DateTimeResource($this->is_recurring)->resource($request),
+            'completed_at' => new DateTimeResource($this->completed_at)->resource($request),
+            'created_at' => new DateTimeResource($this->created_at)->resource($request),
+            'updated_at' => new DateTimeResource($this->updated_at)->resource($request),
         ];
     }
 }

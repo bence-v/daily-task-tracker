@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\TaskFrequency;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,7 +52,7 @@ use Illuminate\Support\Carbon;
  */
 class RecurringTask extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes, HasFactory;
 
     protected $fillable = [
       'user_id',

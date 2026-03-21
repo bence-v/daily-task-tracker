@@ -16,18 +16,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        /*User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);*/
-
-        for ($i = 0; $i < 50; $i++) {
-            Category::create([
-                'name' => 'Category' . ($i+1),
-                'user_id' => 1,
-            ]);
-        }
+        $this->call([
+            UserSeeder::class,
+            CategorySeeder::class,
+            TaskSeeder::class,
+            RecurringTaskSeeder::class,
+        ]);
     }
 }

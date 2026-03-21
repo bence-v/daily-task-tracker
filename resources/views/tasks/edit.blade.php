@@ -42,7 +42,7 @@
                         <!-- Task Date -->
                         <div class="mt-4">
                             <x-input-label for="task_date" :value="__('Due Date')" />
-                            <x-text-input id="task_date" class="block mt-1 w-full" type="date" name="task_date" :value="old('task_date', $task['task_date']?->toDateString())" />
+                            <x-text-input id="task_date" class="block mt-1 w-full" type="date" name="task_date" :value="old('task_date', $task['task_date']['datetime'])" />
                             <x-input-error :messages="$errors->get('task_date')" class="mt-2" />
                         </div>
 

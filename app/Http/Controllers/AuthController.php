@@ -2,67 +2,72 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\RegisterUser;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\AuthManager;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+class AuthController
 {
-    public function showLoginForm()
+    public function __construct(
+        private readonly AuthManager $auth,
+        private readonly Redirector $redirector,
+        private readonly UrlGenerator $url,
+        private readonly Factory $view
+    )
     {
-        return view('auth.login');
+
     }
 
-    public function showRegistrationForm()
+    public function showLoginForm(): View
     {
-        return view('auth.register');
+        return  $this->view->make('auth.login');
+    }
+
+    public function showRegistrationForm(): View
+    {
+        return $this->view->make('auth.register');
     }
 
     public function login(LoginRequest $request)
     {
-        if(Auth::attempt($request->only(['email','password']), $request->boolean('remember')))
+        if($this->auth->attempt($request->only(['email','password']), $request->boolean('remember')))
         {
             session()->regenerate();
 
-            return redirect()->intended(route('dashboard', absolute: false));
+            return $this->redirector->intended(route('dashboard', absolute: false));
         }
 
-        throw ValidationException::withMessages(['email' => 'These credentials do not match our records!']);
+        return $this->redirector->back()
+            ->withErrors(['email' => 'These credentials do not match our records!'])
+            ->withInput($request->except('password'));
     }
 
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request, RegisterUser $registerUser)
     {
         $validated = $request->validated();
 
-        $user = User::create(
-            [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-            ]
-        );
+        $user = $registerUser->execute($validated);
 
-        event(new Registered($user));
+        $this->auth->login($user);
 
-        Auth::login($user);
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->redirector->intended($this->url->route('dashboard', absolute: false));
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
+        $this->auth->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return $this->redirector->to('/');
     }
 }

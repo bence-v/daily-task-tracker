@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
-class RecurringTaskController extends Controller
+class RecurringTaskController
 {
     public function index(Request $request)
     {

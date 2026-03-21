@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Category\CreateCategory;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class CategoryController extends Controller
+class CategoryController
 {
     /**
      * Display a listing of the resource.
@@ -33,7 +34,7 @@ class CategoryController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request, CreateCategory $createCategory)
     {
         $validated = $request->validated();
 
@@ -42,6 +43,7 @@ class CategoryController extends Controller
         $category->user_id = $request->user()->id;
         $category->save();
 
+        $createCategory->execute($request->validated(), $request->user());
         return to_route('categories.index')->with('success', 'Category created successfully!');
     }
 
